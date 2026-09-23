@@ -1,5 +1,4 @@
 .idea/
-.vscode/
 __pycache__/
 dist/
 .coverage*
@@ -7,3 +6,7 @@ htmlcov/
 .tox/
 docs/_build/
 .venv/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
