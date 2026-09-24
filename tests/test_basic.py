@@ -984,3 +984,33 @@ def test_cast_multi_default(runner, nargs, multiple, default, expect):
     result = runner.invoke(cli, standalone_mode=False)
     assert result.exception is None
     assert result.return_value == expect
+
+
+@pytest.mark.parametrize(
+    ("opts", "opt_type", "expected_metavar"),
+    [
+        (["--foo"], None, "--foo TEXT..."),
+        (["--bar", "--baz"], None, "--bar, --baz TEXT..."),
+        (["--count"], int, "--count INTEGER..."),
+    ],
+    ids=["text", "multiple_opts", "integer"],
+)
+def test_option_multiple_metavar_ellipsis(
+    runner, opts, opt_type, expected_metavar
+):
+    """An option with ``multiple=True`` appends ``...`` to its metavar.
+
+    https://github.com/pallets/click/issues/3652
+    """
+    cmd = click.Command(
+        "test",
+        params=[click.Option(opts, multiple=True, type=opt_type)],
+        callback=lambda **_: None,
+    )
+    result = runner.invoke(cmd, ["--help"])
+    assert result.exit_code == 0
+    assert expected_metavar in result.output
+
+    ctx = click.Context(cmd, info_name="test", resilient_parsing=True)
+    for param in cmd.params:
+        assert param.make_metavar(ctx).endswith("...")
